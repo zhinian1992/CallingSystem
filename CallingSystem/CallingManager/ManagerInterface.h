@@ -11,4 +11,4 @@
 
 MANAGERINTERFACE void ExcuteCommand(std::string cmd);
 
-MANAGERINTERFACE void RegisterCallback(CallbackType type,void (*callback)(std::string));
+MANAGERINTERFACE void RegisterCallback(void (*callback)(std::string));

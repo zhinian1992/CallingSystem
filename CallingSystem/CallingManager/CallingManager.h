@@ -20,18 +20,14 @@ public:
 
 	void MessageReceiveCallback(std::string msg);
 
-	void SetCallback(CallbackType type, std::function<void(std::string)> func);
+	void SetCallback(std::function<void(std::string)> func);
 
 private:
 	CallingManager();
 
-	void InitCallbackMap();
-
-	CallbackType GetReceiveMsgType(std::string msg);
-
 private:
 	static CallingManager* m_pManager;
 	std::shared_ptr<ServerConnection> m_pConnect;
-	std::map<CallbackType, std::function<void(std::string)>> m_CbMap;
+	std::function<void(std::string)> m_RecvCallback;
 };
 

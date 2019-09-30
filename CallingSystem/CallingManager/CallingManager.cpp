@@ -9,11 +9,12 @@ CallingManager * CallingManager::getInstance()
 {
 	if (m_pManager == NULL)
 		m_pManager = new CallingManager();
-	return nullptr;
+	return m_pManager;
 }
 
 CallingManager::CallingManager()
 {
+
 	m_pConnect = std::make_shared<ServerConnection>();
 
 	m_pConnect->SetConnectFailed_Callback(std::bind(&CallingManager::ConnectErrorCallback, this));
@@ -26,16 +27,6 @@ CallingManager::CallingManager()
 	assert(bState);
 }
 
-void CallingManager::InitCallbackMap()
-{
-}
-
-CallbackType CallingManager::GetReceiveMsgType(std::string msg)
-{
-	return CallbackType::Call_Failed;
-}
-
-
 CallingManager::~CallingManager()
 {
 	delete m_pManager;
@@ -47,7 +38,9 @@ void CallingManager::Connect()
 {
 	bool bState = m_pConnect->CreateConnection();
 	if (bState)
-		m_CbMap[CallbackType::Connect_Succeed]("");
+		m_RecvCallback("{\"type\":1001}");
+	else
+		m_RecvCallback("{\"type\":1002}");
 }
 
 void CallingManager::SendMessage(std::string msg)
@@ -57,21 +50,17 @@ void CallingManager::SendMessage(std::string msg)
 
 void CallingManager::ConnectErrorCallback()
 {
-	assert(m_CbMap[CallbackType::Connect_Failed]);
-	m_CbMap[CallbackType::Connect_Failed]("");
-
-	Sleep(5000);
-	m_pConnect->CreateConnection();
+	assert(m_RecvCallback);
+	m_RecvCallback("{\"type\":1002}");
 }
 
 void CallingManager::MessageReceiveCallback(std::string msg)
 {
-	std::function<void(std::string)> func = m_CbMap[GetReceiveMsgType(msg)];
-	if (func)
-		func(msg);
+	assert(m_RecvCallback);
+	m_RecvCallback(msg);
 }
 
-void CallingManager::SetCallback(CallbackType type, std::function<void(std::string)> func)
+void CallingManager::SetCallback(std::function<void(std::string)> func)
 {
-	m_CbMap[type] = std::move(func);
+	m_RecvCallback = func;
 }

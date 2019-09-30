@@ -6,8 +6,7 @@
 MANAGERINTERFACE void ExcuteCommand(std::string cmd)
 {
 	CallingManager* cm = CallingManager::getInstance();
-	std::string type = "";
-	if (type.compare("connect") == 0) {
+	if (cmd.compare("connect") == 0) {
 		cm->Connect();
 	}
 	else {
@@ -16,10 +15,9 @@ MANAGERINTERFACE void ExcuteCommand(std::string cmd)
 	return;
 }
 
-
-MANAGERINTERFACE void RegisterCallback(CallbackType type, void(*callback)(std::string))
+MANAGERINTERFACE void RegisterCallback(void(*callback)(std::string))
 {
 	CallingManager* cm = CallingManager::getInstance();
-	cm->SetCallback(type,callback);
+	cm->SetCallback(callback);
 	return;
 }

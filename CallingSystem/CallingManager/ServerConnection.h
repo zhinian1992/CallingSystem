@@ -2,6 +2,7 @@
 #include <string>
 #include <winsock2.h>
 #include <functional>
+#include <thread>
 
 class ServerConnection
 {
@@ -13,11 +14,11 @@ public:
 
 	bool CreateConnection();
 
-	static void CreateMsgLooping();
+	void CreateMsgLooping();
 
 	void CloseSocket();
 
-	static void HeartbeatLooping();
+	void HeartbeatLooping();
 
 	bool SendMessage(std::string msg);
 
@@ -26,6 +27,13 @@ public:
 	void SetConnectFailed_Callback(std::function<void()> func);
 
 	void SetReceiveMsg_Callback(std::function<void(std::string)> func);
+
+	std::thread heartThread() {
+		return std::thread(&ServerConnection::HeartbeatLooping, this);
+	}
+	std::thread receiveThread() {
+		return std::thread(&ServerConnection::CreateMsgLooping, this);
+	}
 
 private:
 	static ServerConnection* m_pServerConn;

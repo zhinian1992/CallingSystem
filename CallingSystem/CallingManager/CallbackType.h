@@ -2,25 +2,27 @@
 
 enum class CallbackType
 {
-	Connecting = 1000,
-	Connect_Failed = 1001,
-	Connect_Succeed = 1002,
+	Get_Org_Data = 5000,
+	Connect_Failed = 5002,
+	Connect_Succeed = 5001,
+	Get_Org_Data_Failed = 5003,
 
-	Logging = 2000,
-	Log_Succeed = 2001,
-	Log_Failed = 2002,
-	Logout = 2003,
+	Logging = 6000,
+	Log_Succeed = 6001,
+	Log_Failed = 6002,
+	Logout = 6003,
 	
-	Get_Queue_Succeed = 3000,
-	Get_Queue_Failed = 3001,
-	Queue_Refresh = 3002,
-	Queue_Add = 3003,
-	Queue_Remove = 3004,
+	Call_Succeed = 7000,
+	Call_Failed = 7001,
+	Skip_Succeed = 7002,
+	Skip_Failed = 7003,
+	Treated_Succeed = 7004,
+	Treated_Failed = 7005,
 
-	Call_Succeed = 4000,
-	Call_Failed = 4001,
-	Skip_Succeed = 4002,
-	Skip_Failed = 4003,
-	Treated_Succeed = 4004,
-	Treated_Failed = 4005,
+	Get_Queue_Succeed = 8001,
+	Get_Queue_Failed = 8002,
+	Queue_Refresh = 8003,
+	Queue_Add = 8004,
+	Queue_Remove = 8005,
+	
 };

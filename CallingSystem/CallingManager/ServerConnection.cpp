@@ -1,7 +1,11 @@
 #include "stdafx.h"
 #include "ServerConnection.h"
+#include "ConfigOperator.h"
 #include <stdio.h>
 #include <future>
+#include <thread>
+#include <algorithm>
+#include <functional>
 
 #pragma comment(lib,"ws2_32.lib")
 
@@ -15,9 +19,11 @@ ServerConnection* ServerConnection::m_pServerConn;
 /// <param name=""></param>
 ServerConnection::ServerConnection()
 {
+	ConfigOperator::getConfigValue(IP, m_ServerIP);
+	string sPort;
+	ConfigOperator::getConfigValue(PORT, sPort);
+	m_ServerPort = atoi(sPort.c_str());
 	m_pServerConn = this;
-	m_ServerIP = "127.0.0.1";
-	m_ServerPort = 9999;
 	m_bConnecting = false;
 }
 
@@ -69,9 +75,11 @@ bool ServerConnection::CreateConnection()
 		return false;
 	}
 	m_bConnecting = true;
-	std::async(std::launch::async, HeartbeatLooping);
-	std::async(std::launch::async, CreateMsgLooping);
-
+	std::thread tHeart = this->heartThread();
+	std::thread tReceive = this->receiveThread();
+	tReceive.detach();
+	tHeart.detach();
+	
 	return true;
 }
 
@@ -83,7 +91,7 @@ void ServerConnection::CreateMsgLooping()
 {
 	while (m_pServerConn->m_bConnecting)
 	{
-		char recvBuf[BUF_SIZE];
+		char recvBuf[BUF_SIZE] = {};
 		int nRc = recv(m_pServerConn->m_SockClient, recvBuf, BUF_SIZE, 0);
 		if (nRc > 0) {
 			std::string msg = recvBuf;
@@ -122,6 +130,7 @@ void ServerConnection::HeartbeatLooping()
 /// <param name="msg">ÏûÏ¢ÄÚÈÝ</param>
 bool ServerConnection::SendMessage(std::string msg)
 {
+	msg += "\n";
 	int iRet = send(m_SockClient, msg.c_str(), msg.length() + 1, 0);
 	if (iRet == SOCKET_ERROR) {
 		m_bConnecting = false;
@@ -139,7 +148,10 @@ bool ServerConnection::SendMessage(std::string msg)
 void ServerConnection::ReceiveMessage(std::string msg)
 {
 	assert(m_RecvCallback);
-	m_RecvCallback(msg);
+	std::string::iterator new_end = remove_if(msg.begin(), msg.end(), std::bind2nd(std::equal_to<char>(), '\n'));
+	msg.erase(new_end, msg.end());
+	if(msg.compare("{\"msg\":\"success\",\"code\":0,\"data\":\"\",\"type\":1}") != 0)
+		m_RecvCallback(msg);
 }
 
 /// <summary>
